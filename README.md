@@ -2,7 +2,7 @@
 This repository provides the code for this article:
 https://royalsocietypublishing.org/doi/10.1098/rsif.2017.0844
 
-This repository is not the original one published by the authors: 
+This repository is not the original one published by the authors:     
 https://github.com/TML-Gatech/DL_Stress_TAA/tree/master
 
 Instead this repository is written all in Python which is not the case for the original repository (Matlab + Python). The old tenserflow pipeline was replaced by up to date Pytorch versions.
