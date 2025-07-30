@@ -1,4 +1,3 @@
-# here the libraries come
 import pandas as pd
 import numpy as np
 import torch
@@ -150,7 +149,7 @@ def Unsupervisedlearning (ShapeDataFile, StressDataFile, IdxList_train, IdxList_
 
     for k in range(len(IdxList_train)):
         # Extract patches from the k-th image
-        tempPatch = im2patch(Sdata_train[:, :, :, k], [50, 100], [50, 100])
+        tempPatch = im2patch(Sdata_train[:, :, :, k], [10, 20], [10, 20])
         
         # tempPatch is assumed to be a 4D array with shape (patch_height, patch_width, channels, num_patches)
         for n in range(tempPatch.shape[3]):
@@ -168,15 +167,15 @@ def Unsupervisedlearning (ShapeDataFile, StressDataFile, IdxList_train, IdxList_
     P1, L1, Vt1 = np.linalg.svd(C1, full_matrices=False) 
     L1=np.sqrt(L1)
 
-    Ps1 = P1[:, :6400]
+    Ps1 = P1[:, :256]
 
     # Pre-allocate the output array.
     # The resulting shape will be (10, 20, 3, 256)
-    W1 = np.empty((50, 100, 3, Ps1.shape[1]), dtype=Ps1.dtype)
+    W1 = np.empty((10, 20, 3, Ps1.shape[1]), dtype=Ps1.dtype)
 
     # Loop over each column and reshape it.
     for k in range(Ps1.shape[1]):
-        W1[:, :, :, k] = Ps1[:, k].reshape((50, 100, 3))
+        W1[:, :, :, k] = Ps1[:, k].reshape((10, 20, 3))
 
     # Convert Sdata_train to a torch tensor and change dimension order from (H, W, C, N) to (N, C, H, W)
     Sdata_train_torch = torch.from_numpy(Sdata_train).permute(3, 2, 0, 1).float()
@@ -190,7 +189,7 @@ def Unsupervisedlearning (ShapeDataFile, StressDataFile, IdxList_train, IdxList_
     bias = torch.zeros(W1_torch.shape[0])
 
     # Set the stride (as provided)
-    stride = (50, 100)
+    stride = (10, 20)
 
     # Perform the convolution using PyTorch's conv2d
     # This performs: output[n, f, i, j] = sum_{c, p, q} Sdata_train_torch[n, c, i*p, j*q] * W1_torch[f, c, p, q] + bias[f]
@@ -372,8 +371,8 @@ def CreateModel_NonlinearMapping(Xshape, Yshape):
 
 def CreateModel_StressDecoding(W1_in, W2_in):
     model = nn.Sequential(
-        nn.ConvTranspose2d(in_channels=64, out_channels=6400, kernel_size=(1, 1), stride=(1, 1)),  # First layer
-        nn.ConvTranspose2d(in_channels=6400, out_channels=3, kernel_size=(50, 100), stride=(50, 100))  # Second layer
+        nn.ConvTranspose2d(in_channels=64, out_channels=256, kernel_size=(5, 5), stride=(1, 1)),  # First layer
+        nn.ConvTranspose2d(in_channels=256, out_channels=3, kernel_size=(10, 20), stride=(10, 20))  # Second layer
     )
 
     # Set pre-trained weights manually
